@@ -1,4 +1,4 @@
- --[====[
+--[====[
 
 getnamecallmethod.lua
 -- Originally © 2024 strawberrys (MIT License)
@@ -13,9 +13,10 @@ local Color3_new = Color3.new
 local debug_info = debug.info
 local _pcall = pcall
 local _xpcall = xpcall
-local string_match = string.match
+local string_find = string.find
+local string_sub = string.sub
 
-local pattern = "^(.+) is not a valid member of %w+$"
+local pattern = " is not a valid"
 
 local function extractNamecallHandler()
 	return debug_info(2, "f")
@@ -33,12 +34,17 @@ local secondHandler = get__namecall(Color3_new())
 
 local function getnamecallmethod()
 	local _, result = _pcall(firstHandler)
-	local method = string_match(result, pattern)
-	if not method then
-		_, result = _pcall(secondHandler)
-		method = string_match(result, pattern)
+	
+	if string_find(result, pattern, 1, true) then
+		local stop = string_find(result, " is not a valid", 1, true)
+		return string_sub(result, 1, stop - 1)
 	end
-	return method
+	
+	_, result = _pcall(secondHandler)
+	local stop = string_find(result, pattern, 1, true)
+	if stop then
+		return string_sub(result, 1, stop - 1)
+	end
 end
 
 --[=[
