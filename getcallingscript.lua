@@ -25,6 +25,7 @@ local _typeof   = typeof
 local _ipairs   = ipairs
 local _tostring   = tostring
 local IsA  = game.IsA
+local RunContext = Enum.RunContext
 
 -- // Allows for more instances to be captured.
 -- // Earlier this starts = more chance (of course if the instances are LocalScripts etc..)
@@ -36,7 +37,7 @@ end)
 Connect(DescendantAdded, function(d)
 	table_insert(tblvalid, d)
 end)
-for i, v in GetDescendants(game) do
+for i, v in ipairs(GetDescendants(game)) do
 	table_insert(tblvalid, v)
 end
 
@@ -72,7 +73,7 @@ _xpcall(
 )
 
 local function getInstance(path)
-	local current
+	local current = game
 	if path == "game" then 
 		return game
 	end
@@ -111,11 +112,14 @@ getcallingscript = function()
 	end
 
 	local tb = debug_traceback()
-	local name = string_match(tb, "([%w_]+):%d+")
-	if name then
+	local path = string_match(tb, "([%w%.]+):%d+")
+	if path then
 		for _, v in _ipairs(getinstances()) do
-			if _tostring(v) == name and IsA(v, "LuaSourceContainer") then
-				return v
+			if IsA(v, "LuaSourceContainer") then
+				if (v:IsA("LocalScript") or (v:IsA("Script") and v.RunContext == RunContext.Client))
+				   and v:GetFullName() == path then
+					return v
+				end
 			end
 		end
 	end
