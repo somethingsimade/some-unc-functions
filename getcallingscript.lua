@@ -7,6 +7,7 @@ local DescendantRemoving = game.DescendantRemoving
 local DescendantAdded = game.DescendantAdded
 local GetDescendants = game.GetDescendants
 local Connect = DescendantRemoving.Connect
+local GetFullName = game.GetFullName
 local table = table
 local table_insert = table.insert
 local table_freeze = table.freeze
@@ -25,41 +26,73 @@ local _typeof   = typeof
 local _ipairs   = ipairs
 local _tostring   = tostring
 local IsA  = game.IsA
-local RunContext = Enum.RunContext
+local RunContextClient = Enum.RunContext.Client
 
 -- // Allows for more instances to be captured.
 -- // Earlier this starts = more chance (of course if the instances are LocalScripts etc..)
 local tblnil = {}
 local tblvalid = {}
+local allinstances = {}
+local LuaSourceContainers = {}
+local LocalScripts = {}
+
 Connect(DescendantRemoving, function(d)
 	table_insert(tblnil, d)
+	table_insert(allinstances, d)
+	if IsA(d, "LuaSourceContainer") then
+		table_insert(LuaSourceContainers, d)
+		if (IsA(d, "LocalScript") or (IsA(d, "Script") and d.RunContext == RunContextClient)) then
+			table_insert(LocalScripts, d)
+		end
+	end
 end)
 Connect(DescendantAdded, function(d)
 	table_insert(tblvalid, d)
+	table_insert(allinstances, d)
+	if IsA(d, "LuaSourceContainer") then
+		table_insert(LuaSourceContainers, d)
+		if (IsA(d, "LocalScript") or (IsA(d, "Script") and d.RunContext == RunContextClient)) then
+			table_insert(LocalScripts, d)
+		end
+	end
 end)
-for i, v in ipairs(GetDescendants(game)) do
+for i, v in _ipairs(GetDescendants(game)) do
 	table_insert(tblvalid, v)
+	table_insert(allinstances, v)
+	if IsA(v, "LuaSourceContainer") then
+		table_insert(LuaSourceContainers, v)
+		if (IsA(v, "LocalScript") or (IsA(v, "Script") and v.RunContext == RunContextClient)) then
+			table_insert(LocalScripts, v)
+		end
+	end
 end
 
 local getnilinstances = getnilinstances
 local getinstances = getinstances
+local getscripts = getscripts
+local getlocalscripts = getlocalscripts
 
 if not getnilinstances then
 	getnilinstances = function()
-		return table_freeze(tblnil)
+		return tblnil
 	end
 end
 
 if not getinstances then
 	getinstances = function()
-		local tbltmp = {}
-		for i, v in ipairs(tblnil) do
-			table_insert(tbltmp, v)
-		end
-		for i, v in ipairs(tblvalid) do
-			table_insert(tbltmp, v)
-		end
-		return table_freeze(tbltmp)
+		return allinstances
+	end
+end
+
+if not getscripts then
+	getscripts = function()
+		return LuaSourceContainers
+	end
+end
+
+if not getlocalscripts then
+	getlocalscripts = function()
+		return LocalScripts
 	end
 end
 
@@ -114,12 +147,9 @@ getcallingscript = function()
 	local tb = debug_traceback()
 	local path = string_match(tb, "([%w%.]+):%d+")
 	if path then
-		for _, v in _ipairs(getinstances()) do
-			if IsA(v, "LuaSourceContainer") then
-				if (v:IsA("LocalScript") or (v:IsA("Script") and v.RunContext == RunContext.Client))
-				   and v:GetFullName() == path then
-					return v
-				end
+		for _, v in _ipairs(getlocalscripts()) do
+			if GetFullName(v) == path then
+				return v
 			end
 		end
 	end
