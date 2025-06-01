@@ -33,43 +33,40 @@ local RunContextClient = Enum.RunContext.Client
 local tblnil = {}
 local tblvalid = {}
 local allinstances = {}
-local LuaSourceContainers = {}
 local LocalScripts = {}
+
+local dummy = {}
+
+local indexinstance
+_xpcall(
+	function() return game[dummy] end,
+	function() indexinstance = debug_info(2, "f") end
+)
 
 Connect(DescendantRemoving, function(d)
 	table_insert(tblnil, d)
 	table_insert(allinstances, d)
-	if IsA(d, "LuaSourceContainer") then
-		table_insert(LuaSourceContainers, d)
-		if (IsA(d, "LocalScript") or (IsA(d, "Script") and d.RunContext == RunContextClient)) then
-			table_insert(LocalScripts, d)
-		end
+	if (IsA(d, "LocalScript") or (IsA(d, "Script") and indexinstance(d, "RunContext") == RunContextClient)) then
+		table_insert(LocalScripts, d)
 	end
 end)
 Connect(DescendantAdded, function(d)
 	table_insert(tblvalid, d)
 	table_insert(allinstances, d)
-	if IsA(d, "LuaSourceContainer") then
-		table_insert(LuaSourceContainers, d)
-		if (IsA(d, "LocalScript") or (IsA(d, "Script") and d.RunContext == RunContextClient)) then
-			table_insert(LocalScripts, d)
-		end
+	if (IsA(d, "LocalScript") or (IsA(d, "Script") and indexinstance(d, "RunContext") == RunContextClient)) then
+		table_insert(LocalScripts, d)
 	end
 end)
 for i, v in _ipairs(GetDescendants(game)) do
 	table_insert(tblvalid, v)
 	table_insert(allinstances, v)
-	if IsA(v, "LuaSourceContainer") then
-		table_insert(LuaSourceContainers, v)
-		if (IsA(v, "LocalScript") or (IsA(v, "Script") and v.RunContext == RunContextClient)) then
-			table_insert(LocalScripts, v)
-		end
+	if (IsA(v, "LocalScript") or (IsA(v, "Script") and indexinstance(v, "RunContext") == RunContextClient)) then
+		table_insert(LocalScripts, v)
 	end
 end
 
 local getnilinstances = getnilinstances
 local getinstances = getinstances
-local getscripts = getscripts
 local getlocalscripts = getlocalscripts
 
 if not getnilinstances then
@@ -84,26 +81,11 @@ if not getinstances then
 	end
 end
 
-if not getscripts then
-	getscripts = function()
-		return LuaSourceContainers
-	end
-end
-
 if not getlocalscripts then
 	getlocalscripts = function()
 		return LocalScripts
 	end
 end
-
-local dummy = {}
-local returndebug  = function() return debug_info(2, "f") end
-
-local indexinstance
-_xpcall(
-	function() return game[dummy] end,
-	function() indexinstance = returndebug() end
-)
 
 local function getInstance(path)
 	local current = game
