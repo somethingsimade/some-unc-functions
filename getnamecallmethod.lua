@@ -8,41 +8,46 @@ getnamecallmethod.lua
 
 ]====]
 
-local OverlapParams_new = OverlapParams.new
-local Color3_new = Color3.new
-local debug_info = debug.info
-local _pcall = pcall
-local _xpcall = xpcall
-local string_find = string.find
-local string_sub = string.sub
-
+local OverlapParams_new, debug_info, _pcall, _xpcall, string_find, string_sub = OverlapParams.new, debug.info, pcall, xpcall, string.find, string.sub
 local pattern = " is not a valid"
+local savedstring = "missing argument #1 (OverlapParams expected)"
 
-local function extractNamecallHandler()
+local _, handler = _xpcall(function()
+	OverlapParams_new():__namecall()
+end, function()
 	return debug_info(2, "f")
-end
-
-local function get__namecall(obj)
-	local _, handler = _xpcall(function()
-		obj:__namecall()
-	end, extractNamecallHandler)
-	return handler
-end
-
-local firstHandler  = get__namecall(OverlapParams_new())
-local secondHandler = get__namecall(Color3_new())
+end)
 
 local function getnamecallmethod()
-	local _, result = _pcall(firstHandler)
-	
+	local _, result = _pcall(handler)
+local OverlapParams_new, debug_info, _pcall, _xpcall, string_find, string_sub = OverlapParams.new, debug.info, pcall, xpcall, string.find, string.sub
+local pattern = " is not a valid"
+local savedstring = "missing argument #1 (OverlapParams expected)"
+
+local _, handler = _xpcall(function()
+	OverlapParams_new():__namecall()
+end, function()
+	return debug_info(2, "f")
+end)
+
+local function getnamecallmethod()
+	local _, result = _pcall(handler)
+
+	if result == savedstring then
+		return "AddToFilter"
+	end
+
 	if string_find(result, pattern, 1, true) then
 		local stop = string_find(result, " is not a valid", 1, true)
 		return string_sub(result, 1, stop - 1)
 	end
-	
-	_, result = _pcall(secondHandler)
-	local stop = string_find(result, pattern, 1, true)
-	if stop then
+end
+	if result == savedstring then
+		return "AddToFilter"
+	end
+
+	if string_find(result, pattern, 1, true) then
+		local stop = string_find(result, " is not a valid", 1, true)
 		return string_sub(result, 1, stop - 1)
 	end
 end
