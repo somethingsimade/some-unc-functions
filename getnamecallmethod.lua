@@ -18,7 +18,7 @@ end, function()
 	return debug_info(2, "f")
 end)
 
-local function getnamecallmethod()
+function getnamecallmethod()
 	local _, result = _pcall(handler)
 
 	if result == savedstring then
