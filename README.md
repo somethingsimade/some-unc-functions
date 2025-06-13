@@ -101,3 +101,20 @@ end)
 -- Now they can do this:
 __newIndex(workspace.Baseplate, "Parent", nil)
 ```
+
+### 5. `gethiddenproperty`
+
+Gets a hidden property from an instance.
+
+Takes two arguments:
+1. Instance
+2. Property
+
+gethiddenproperty(instance, property)
+
+**Example:**
+
+```lua
+local Motor6D = Instance.new("Motor6D")
+print(gethiddenproperty(Motor6D, "ReplicateCurrentOffset6D")) -- Outputs "0, 0, 0"
+```
