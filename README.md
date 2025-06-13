@@ -108,7 +108,7 @@ __newIndex(workspace.Baseplate, "Parent", nil)
 
 Gets a hidden property from an instance.
 
-Takes two arguments:
+Parameters:
 1. Instance
 2. Property
 
