@@ -19,13 +19,15 @@ function gethiddenproperty(instance, property)
         return GetPropertyValue(UGCValidationService, instance, property)
     end)
     if success and result then
-        return result
+        return result, true
     else
         --// If it didn't return anything, or it didn't succeed,
         --// We try accessing it directly
-        local success, result = pcall(__Index, instance, property)
-        if success then
-            return result
+         local success2, result2 = pcall(__Index, instance, property)
+        if success2 then
+            return result2, false
+        else
+            return __Index(instance, property)
         end
     end
 end
