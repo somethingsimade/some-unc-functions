@@ -66,6 +66,8 @@ old = hookmetamethod(game, "__index", function(self, key)
 	end
 	return old(self, key)
 end)
+
+print(game.NotAllowed) -- Output: "nil"
 ```
 
 *Please note that it should not be implemented as the following example:*
