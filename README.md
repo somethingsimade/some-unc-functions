@@ -106,7 +106,7 @@ __newIndex(workspace.Baseplate, "Parent", nil)
 
 ### 5. `gethiddenproperty`
 
-Gets a hidden property from an instance.
+Gets a hidden property from an instance, and returns if the property was hidden or not.
 
 Parameters:
 1. Instance
@@ -118,5 +118,5 @@ gethiddenproperty(instance, property)
 
 ```lua
 local Motor6D = Instance.new("Motor6D")
-print(gethiddenproperty(Motor6D, "ReplicateCurrentOffset6D")) -- Outputs "0, 0, 0"
+print(gethiddenproperty(Motor6D, "ReplicateCurrentOffset6D")) -- Outputs "0, 0, 0 true"
 ```
