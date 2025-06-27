@@ -120,3 +120,27 @@ gethiddenproperty(instance, property)
 local Motor6D = Instance.new("Motor6D")
 print(gethiddenproperty(Motor6D, "ReplicateCurrentOffset6D")) -- Outputs "0, 0, 0 true"
 ```
+### 6. `getfflag`
+Function used for getting a Fast Flag's (FFlag) value.
+
+Parameters:
+1. FFlag (String)
+
+**Example:**
+
+```lua
+print(getfflag("FFlagDisablePostFx")) -- Outputs "false" by default
+```
+
+### 7. `setfflag`
+Function used for setting a Fast Flag's (FFlag) value.
+
+Parameters:
+1. FFlag (String)
+2. Value
+
+**Example:**
+
+```lua
+setfflag("FFlagDisablePostFx", true)
+```
