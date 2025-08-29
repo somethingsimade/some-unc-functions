@@ -27,7 +27,7 @@ local patched__namecall = function(instance, method, ...)
 	return namecall(instance, ...)
 end
 
-print(patched__namecall(game, "Shutdown")) --> Output: Workspace
+print(patched__namecall(game, "FindFirstChild", "Workspace")) --> Output: Workspace
 
 --> Or you can do this: <--
 
@@ -39,5 +39,5 @@ end)
 
 setnamecallmethod("FindFirstChild")
 
-namecall(game, "Workspace")
+print(namecall(game, "Workspace"))
 ]=]
