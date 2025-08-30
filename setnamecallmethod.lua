@@ -7,9 +7,7 @@ local function setnamecallmethod(method)
 	if type(method) ~= "string" then
 		return error("invalid argument #1 to 'setnamecallmethod' (string expected, got " .. typeof(method) .. ")")
 	end
-	
-	local res = loadstring("local args = { ... }; local instance = args[1]; instance:" .. method .. "()")
-	pcall(res, _Instance)
+	pcall(loadstring("local instance = ...; instance:" .. method .. "()"), _Instance)
 end
 
 --[=[
