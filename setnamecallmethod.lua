@@ -2,12 +2,13 @@
 -- © 2025 MrY7zz (MIT License)
 
 local _Instance = Instance.new("BuoyancySensor")
+_Instance.Destroy(_Instance)
 
 local function setnamecallmethod(method)
 	if type(method) ~= "string" then
 		return error("invalid argument #1 to 'setnamecallmethod' (string expected, got " .. typeof(method) .. ")")
 	end
-	pcall(loadstring("local instance = ...; instance:" .. method .. "()"), _Instance)
+	pcall(loadstring("(...):" .. method .. "()"), _Instance)
 end
 
 --[=[
