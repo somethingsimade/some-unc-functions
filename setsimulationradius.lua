@@ -1,5 +1,5 @@
 -- setsimulationradius.lua
--- © 2025 MrY7zz (MIT License)
+-- © 2026 MrY7zz (MIT License)
 
 local Players = game:GetService("Players")
 
