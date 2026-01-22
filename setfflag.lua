@@ -1,5 +1,5 @@
 -- setfflag.lua
--- © 2025 MrY7zz (MIT License)
+-- © 2026 MrY7zz (MIT License)
 
 local SetFFlagFunc = game.DefineFastFlag
 local DataModel = game
