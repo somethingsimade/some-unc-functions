@@ -1,5 +1,5 @@
 -- gethiddenproperty.lua
--- © 2025 MrY7zz (MIT License)
+-- © 2026 MrY7zz (MIT License)
 
 --// This implementation can be detected, as it creates a service that
 --// Isn't created by default.
