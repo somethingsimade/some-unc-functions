@@ -1,5 +1,5 @@
 -- getcallingscript.lua
--- © 2025 MrY7zz (MIT License)
+-- © 2026 MrY7zz (MIT License)
 
 -- // Caching
 local game = Game
