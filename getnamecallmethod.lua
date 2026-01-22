@@ -2,7 +2,7 @@
 
 getnamecallmethod.lua
 -- Originally © 2024 strawberrys (MIT License)
--- Modified by MrY7zz, 2025 (MIT License)
+-- Modified by MrY7zz, 2026 (MIT License)
 
 -- The script creates a function to extract the __namecall method name in Luau
 
