@@ -1,5 +1,5 @@
 -- setnamecallmethod.lua
--- © 2025 MrY7zz (MIT License)
+-- © 2026 MrY7zz (MIT License)
 
 local _Instance = Instance.new("BuoyancySensor")
 _Instance.Destroy(_Instance)
