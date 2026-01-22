@@ -1,5 +1,5 @@
 -- getfflag.lua
--- © 2025 MrY7zz (MIT License)
+-- © 2026 MrY7zz (MIT License)
 
 local GetFFlag = game.GetFastFlag
 local DataModel = game
