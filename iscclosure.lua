@@ -3,6 +3,7 @@
 
 local debug_info = debug.info
 
+@native
 function iscclosure(func)
 	if typeof(func) ~= "function" then
 		error("invalid argument #1 to 'iscclosure' (function expected, got " .. typeof(func) .. ")")
