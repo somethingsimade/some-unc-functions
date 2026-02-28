@@ -5,7 +5,9 @@
 --// Isn't created by default.
 local UGCValidationService = game:GetService('UGCValidationService')
 local GetPropertyValue = UGCValidationService.GetPropertyValue
-local FindFirstChild = game.FindFirstChild
+local FindFirstChild = UGCValidationService.FindFirstChild
+local GetPropertyChangedSignal = UGCValidationService.GetPropertyChangedSignal
+
 local __Index
 xpcall(function()
 	return game[{}]
@@ -13,6 +15,7 @@ end, function()
 	__Index = debug.info(2, 'f')
 end)
 
+@native
 function gethiddenproperty(instance, property)
 	--// First we try to get the property with UGCValidationService
 	--// This won't work every time
@@ -22,10 +25,10 @@ function gethiddenproperty(instance, property)
 	if success and result ~= nil then
 		return result, true
 	else
-		if FindFirstChild(instance, property) ~= nil then return nil end --// Prevent indexing an instance instead of a property
 		--// If it didn't return anything, or it didn't succeed,
 		--// We try accessing it directly
 		local success2, result2 = pcall(__Index, instance, property)
+		if not pcall(GetPropertyChangedSignal, instance, property) then return nil end --// Prevent indexing an instance instead of a property
 		if success2 then
 			return result2, false
 		else
