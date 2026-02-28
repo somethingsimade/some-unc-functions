@@ -16,9 +16,11 @@ end, function()
 	return debug_info(2, "f")
 end)
 
+@native
 function getnamecallmethod()
 	local _, r = _pcall(handler)
-	local s = string_find(r, " is not a valid", 1, true)
+	
+	local s = string_find(r, " is", 1, true)
 	return s and string_sub(r, 1, s - 1) or "AddToFilter"
 end
 
