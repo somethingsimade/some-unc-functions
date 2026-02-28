@@ -15,7 +15,7 @@ end)
 
 function gethiddenproperty(instance, property)
 	--// First we try to get the property with UGCValidationService
-	--// This won't work 100% of the times
+	--// This won't work every time
 	local success, result = pcall(function()
 		return GetPropertyValue(UGCValidationService, instance, property)
 	end)
