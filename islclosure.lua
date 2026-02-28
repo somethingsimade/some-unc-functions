@@ -3,6 +3,7 @@
 
 local debug_info = debug.info
 
+@native
 function islclosure(func)
 	if typeof(func) ~= "function" then
 		error("invalid argument #1 to 'islclosure' (function expected, got " .. typeof(func) .. ")")
