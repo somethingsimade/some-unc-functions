@@ -5,6 +5,7 @@
 --// Isn't created by default.
 local UGCValidationService = game:GetService('UGCValidationService')
 local GetPropertyValue = UGCValidationService.GetPropertyValue
+local FindFirstChild = game.FindFirstChild
 local __Index
 xpcall(function()
     return game[{}]
@@ -21,6 +22,7 @@ function gethiddenproperty(instance, property)
     if success and result then
         return result, true
     else
+        if FindFirstChild(instance, property) then return nil end --// Prevent indexing an instance instead of a property
         --// If it didn't return anything, or it didn't succeed,
         --// We try accessing it directly
          local success2, result2 = pcall(__Index, instance, property)
@@ -30,6 +32,7 @@ function gethiddenproperty(instance, property)
             return __Index(instance, property)
         end
     end
+    return nil
 end
 
 --[[
