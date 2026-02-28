@@ -198,11 +198,10 @@ local function GetPlatform()
 			return Plat_MetaOS
 		end
 		
-		local hasTouch = instanceIndex(UserInputService, "TouchEnabled")
 		local hasAccel = instanceIndex(UserInputService, "AccelerometerEnabled")
 		local hasGyro = instanceIndex(UserInputService, "GyroscopeEnabled")
 		
-		if not hasTouch and not hasAccel and not hasGyro then
+		if not hasAccel and not hasGyro then
 			return Plat_Linux -- Sober
 		end
 		
