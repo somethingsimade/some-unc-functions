@@ -196,11 +196,17 @@ local function GetPlatform()
 	if MobileUwpOrVr then
 		if VR then
 			return Plat_MetaOS
-		elseif getArchitecture() == 32 or not isValidCharacter("\u{F8FF}") then
-			if not instanceIndex(UserInputService, "TouchEnabled") and isValidCharacter("\u{E0FF}") then
-				return Plat_Linux -- "Sober"
-			end
-
+		end
+		
+		local hasTouch = instanceIndex(UserInputService, "TouchEnabled")
+		local hasAccel = instanceIndex(UserInputService, "AccelerometerEnabled")
+		local hasGyro = instanceIndex(UserInputService, "GyroscopeEnabled")
+		
+		if not hasTouch and not hasAccel and not hasGyro then
+			return Plat_Linux -- Sober
+		end
+		
+		if getArchitecture() == 32 or not isValidCharacter("\u{F8FF}") then
 			return Plat_Android
 		end
 
