@@ -12,27 +12,71 @@ local GuiService = game:GetService("GuiService")
 local VRService = game:GetService("VRService")
 local TextService = game:GetService("TextService")
 
+local string_sub, string_match, string_lower, string_len = string.sub, string.match, string.lower, string.len
+local os_date, tonumber, tostring, type, typeof, pcall, xpcall, debug_info = os.date, tonumber, tostring, type, typeof, pcall, xpcall, debug.info
+
+local instanceIndex
+xpcall(function()
+	return game[{}]
+end, function()
+	instanceIndex = debug.info(2, "f")
+end)
+
+local enumIndex
+xpcall(function()
+	return Enum.Platform[{}]
+end, function()
+	enumIndex = debug.info(2, "f")
+end)
+
+--// Cache Methods
+local GetTextSize = TextService.GetTextSize
+local IsTenFootInterface = GuiService.IsTenFootInterface
+local GetImageForKeyCode = UserInputService.GetImageForKeyCode
+local us = UserSettings()
+local IsUserFeatureEnabled = us.IsUserFeatureEnabled
+
+local Enum_Platform = Enum.Platform
+local Enum_KeyCode = Enum.KeyCode
+
+local Plat_None = enumIndex(Enum_Platform, "None")
+local Plat_UWP = enumIndex(Enum_Platform, "UWP")
+local Plat_XBoxOne = enumIndex(Enum_Platform, "XBoxOne")
+local Plat_Windows = enumIndex(Enum_Platform, "Windows")
+local Plat_Linux = enumIndex(Enum_Platform, "Linux")
+local Plat_OSX = enumIndex(Enum_Platform, "OSX")
+local Plat_PS4 = enumIndex(Enum_Platform, "PS4")
+local Plat_PS5 = enumIndex(Enum_Platform, "PS5")
+local Plat_MetaOS = enumIndex(Enum_Platform, "MetaOS")
+local Plat_Android = enumIndex(Enum_Platform, "Android")
+local Plat_IOS = enumIndex(Enum_Platform, "IOS")
+
+local KeyCode_ButtonSelect = enumIndex(Enum_KeyCode, "ButtonSelect")
+
 --// Pre-configuration
 local TextSettings = {
 	16,
 	"SourceSans",
-	Vector2.one * 1000,
+	Vector2.new(1000, 1000),
 }
 
-local invalidSize = TextService:GetTextSize("\u{FFFF}", unpack(TextSettings))
+local invalidSize = GetTextSize(TextService, "\u{FFFF}", unpack(TextSettings))
 local _version = version()
+
+local vPrefix = string_sub(_version, 1, 2)
+local Web = (vPrefix == "0.")
+local MobileUwpOrVr = (vPrefix == "2." or vPrefix == "3.")
 
 --// Helpers
 local function isValidCharacter(character)
-	local size = TextService:GetTextSize(character, unpack(TextSettings))
-
+	local size = GetTextSize(TextService, character, unpack(TextSettings))
 	return size.Magnitude ~= invalidSize.Magnitude
 end
 
 local function getArchitecture()
-	local address = tonumber(string.sub(tostring{math.huge}, 8))
+	local address = tonumber(string_sub(tostring({math.huge}), 8))
 
-	if string.len(tostring(address)) <= 10 then
+	if string_len(tostring(address)) <= 10 then
 		return 32
 	end
 
@@ -46,123 +90,128 @@ local function isWindowsTimezone(value)
 	if typeof(value) ~= "string" then return false end
 
 	local s = (value):gsub("^%s+", ""):gsub("%s+$", "")
-	if s == "" or s:sub(1, 4) == "(UTC" then return false end
+	if s == "" or string_sub(s, 1, 4) == "(UTC" then return false end
 
-	if s:lower():sub(-7) == "_dstoff" then
-		s = s:sub(1, -8):gsub("%s+$", "")
+	if string_lower(string_sub(s, -7)) == "_dstoff" then
+		s = string_sub(s, 1, -8):gsub("%s+$", "")
 		if s == "" then return false end
 	end
 
-	if #s > 80 or s:find("[^A-Za-z0-9 .,'&/%(%)+%-]") then return false end
+	if #s > 80 or string_match(s, "[^A-Za-z0-9 .,'&/%(%)+%-]") then return false end
 	if s == "UTC" then return true end
 
-	local hh = s:match("^UTC[%+%-](%d%d)$")
+	local hh = string_match(s, "^UTC[%+%-](%d%d)$")
 	if hh then
 		local n = tonumber(hh)
 		if n and n >= 0 and n <= 14 then return true end
 	end
 
-	if s:sub(-14) == " Standard Time" or s:match(" Standard Time%s*%b()$") then return true end
-	if s:sub(-14) == " Daylight Time" or s:match(" Daylight Time%s*%b()$") then return true end
+	if string_sub(s, -14) == " Standard Time" or string_match(s, " Standard Time%s*%b()$") then return true end
+	if string_sub(s, -14) == " Daylight Time" or string_match(s, " Daylight Time%s*%b()$") then return true end
 
-	if s:match("^.+ Time Zone %d%d?$") then return true end
+	if string_match(s, "^.+ Time Zone %d%d?$") then return true end
 	return false
 end
 
 -- IOS
 local function matchesIOS(s)
-	return s:match("^[+-]%d%d%d?%d?$") ~= nil
-		or s:match("^%a%a%a%a?%a?$") ~= nil
+	return string_match(s, "^[+-]%d%d%d?%d?$") ~= nil
+		or string_match(s, "^%a%a%a%a?%a?$") ~= nil
 end
 
 local isWindowsSucceeded, isWindows = pcall(function()
-	return GuiService.IsWindows
+	return instanceIndex(GuiService, "IsWindows")
 end)
 
+@native
 local function GetPlatform() 
-	local timeZone = os.date("%Z")
-	local touchEnabled = UserInputService.TouchEnabled
+	local timeZone = os_date("%Z")
 
 	if type(timeZone) ~= "string" then
-		return Enum.Platform.None
+		return Plat_None
 	end
 
-	local isWindowsTimezoneDetected = isWindowsTimezone(timeZone)
-	local timezoneMatchesIOS = matchesIOS(timeZone)
+	-- Executing the cached methods by passing 'self'
+	local Console = IsTenFootInterface(GuiService)
+	local VR = instanceIndex(UserInputService, "VREnabled") and instanceIndex(VRService, "VREnabled")
 
-	local Web = string.match(_version, "^0%.") ~= nil
-	local Console = GuiService:IsTenFootInterface()
-	local MobileUwpOrVr = string.match(_version, "^2%.") ~= nil or string.match(_version, "^3%.") ~= nil
-	local VR = UserInputService.VREnabled and VRService.VREnabled
+	-- Lazy timezone evaluation wrapper
+	local isWindowsTz = nil 
+	local function checkWindowsTz()
+		if isWindowsTz == nil then isWindowsTz = isWindowsTimezone(timeZone) end
+		return isWindowsTz
+	end
 
 	--// We are operating on windows
 	if not isWindowsSucceeded then
-		if MobileUwpOrVr and isWindowsTimezoneDetected then
-			return Enum.Platform.UWP
-		elseif Console and isWindowsTimezoneDetected then 
-			return Enum.Platform.XBoxOne
-		elseif isWindowsTimezoneDetected and Web then
-			return Enum.Platform.Windows
+		if MobileUwpOrVr and checkWindowsTz() then
+			return Plat_UWP
+		elseif Console and checkWindowsTz() then 
+			return Plat_XBoxOne
+		elseif checkWindowsTz() and Web then
+			return Plat_Windows
 		end
 	elseif isWindows then
-		if MobileUwpOrVr and isWindowsTimezoneDetected then
-			return Enum.Platform.UWP
+		if MobileUwpOrVr and checkWindowsTz() then
+			return Plat_UWP
 		elseif Console then
-			return Enum.Platform.XBoxOne
+			return Plat_XBoxOne
 		elseif isValidCharacter("\u{E0FF}") then
-			return Enum.Platform.Linux
+			return Plat_Linux
 		end
 		--// ^ Maybe leave outside isWindows check
 
-		if isWindowsTimezoneDetected and Web then
-			return Enum.Platform.Windows
+		if checkWindowsTz() and Web then
+			return Plat_Windows
 		end
 	end
 
 	--// More checks
 
 	-- OSX
-	local success1, UserFixOrbitalCam = pcall(UserSettings().IsUserFeatureEnabled, UserSettings(), "UserFixOrbitalCam")
-	local success2, UserInputRefactor2 = pcall(UserSettings().IsUserFeatureEnabled, UserSettings(), "UserInputRefactor2")
+	local success1, UserFixOrbitalCam = pcall(IsUserFeatureEnabled, us, "UserFixOrbitalCam")
 
-	if (success1 and success2) and (UserFixOrbitalCam and UserInputRefactor2) and isValidCharacter("\u{F8FF}") then
-		return Enum.Platform.OSX
+	if success1 and UserFixOrbitalCam then
+		local success2, UserInputRefactor2 = pcall(IsUserFeatureEnabled, us, "UserInputRefactor2")
+		if success2 and UserInputRefactor2 and isValidCharacter("\u{F8FF}") then
+			return Plat_OSX
+		end
 	end
 
 	-- Console
-
 	if Console then
-		local rbxassetForKeycode = string.lower(UserInputService:GetImageForKeyCode(Enum.KeyCode.ButtonSelect))
+		local rbxassetForKeycode = string_lower(GetImageForKeyCode(UserInputService, KeyCode_ButtonSelect))
 
-		if string.match(rbxassetForKeycode, "ps4") then
-			return Enum.Platform.PS4
-		elseif string.match(rbxassetForKeycode, "ps5") then 
-			return Enum.Platform.PS5
-		elseif string.match(rbxassetForKeycode, "xbox") or isWindowsTimezoneDetected then --// OneStatFrame detection wouldn't work 1. LocalScripts can't access instances inside CoreGui and even more recently Roblox made CoreGui nil for LocalScripts...
-			return Enum.Platform.XBoxOne
+		if string_match(rbxassetForKeycode, "ps4") then
+			return Plat_PS4
+		elseif string_match(rbxassetForKeycode, "ps5") then 
+			return Plat_PS5
+		elseif string_match(rbxassetForKeycode, "xbox") or checkWindowsTz() then 
+			--// OneStatFrame detection wouldn't work 1. LocalScripts can't access instances inside CoreGui and even more recently Roblox made CoreGui nil for LocalScripts...
+			return Plat_XBoxOne
 		end
 	end
 
 	-- Final checks
 	if MobileUwpOrVr then
 		if VR then
-			return Enum.Platform.MetaOS
+			return Plat_MetaOS
 		elseif getArchitecture() == 32 or not isValidCharacter("\u{F8FF}") then
-			if not UserInputService.TouchEnabled and isValidCharacter("\u{E0FF}") then
-				return Enum.Platform.Linux -- "Sober"
+			if not instanceIndex(UserInputService, "TouchEnabled") and isValidCharacter("\u{E0FF}") then
+				return Plat_Linux -- "Sober"
 			end
 
-			return Enum.Platform.Android
+			return Plat_Android
 		end
 
-		if timezoneMatchesIOS then
-			return Enum.Platform.IOS
+		if matchesIOS(timeZone) then
+			return Plat_IOS
 		end
 	elseif VR then
 		-- There isn't another VR platform, at least in Enum.Platform
 	end
 
-	return Enum.Platform.None
+	return Plat_None
 end
 
 --[==[
