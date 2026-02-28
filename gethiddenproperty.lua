@@ -19,10 +19,10 @@ function gethiddenproperty(instance, property)
     local success, result = pcall(function()
         return GetPropertyValue(UGCValidationService, instance, property)
     end)
-    if success and result then
+    if success and result ~= nil then
         return result, true
     else
-        if FindFirstChild(instance, property) then return nil end --// Prevent indexing an instance instead of a property
+        if FindFirstChild(instance, property) ~= nil then return nil end --// Prevent indexing an instance instead of a property
         --// If it didn't return anything, or it didn't succeed,
         --// We try accessing it directly
          local success2, result2 = pcall(__Index, instance, property)
