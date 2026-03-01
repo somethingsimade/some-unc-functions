@@ -109,13 +109,15 @@ end
 
 -- // Main function
 getcallingscript = function()
-	local src = debug_info(1, "s")
-	local inst = getInstance(src)
-	if inst then 
-		return inst 
-	end
+	for i = 3, 10 do 
+		local src = debug_info(i, "s")
+		if not src then break end
 
-	for i = 1, 3 do
+		local inst = getInstance(src)
+		if inst then
+			return inst
+		end
+
 		local f = debug_info(i, "f")
 		if f then
 			local env = _getfenv(f)
