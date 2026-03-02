@@ -108,7 +108,8 @@ local function getInstance(path)
 end
 
 -- // Main function
-getcallingscript = function()
+@native
+function getcallingscript()
 	for i = 3, 10 do 
 		local src = debug_info(i, "s")
 		if not src then break end
