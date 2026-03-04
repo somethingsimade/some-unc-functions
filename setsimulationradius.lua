@@ -22,11 +22,11 @@ end)
 
 
 function setsimulationradius(Radius, maxRadius)
+	local LocalPlayer = Index(Players, "LocalPlayer")
+	
 	if maxRadius then
 		newIndex(LocalPlayer, "MaximumSimulationRadius", maxRadius)
 	end
-	
-	local LocalPlayer = Index(Players, "LocalPlayer")
 	newIndex(LocalPlayer, "SimulationRadius", Radius)
 end
 
