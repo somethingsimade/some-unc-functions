@@ -95,7 +95,7 @@ local function getInstance(path)
 	if string_sub(path, 1, 5) == "game." then 
 		path = string_sub(path, 6) 
 	end
-	if not string_find(path, "%.", 1, true) then 
+	if not string_find(path, "%.", 1) then 
 		return 
 	end
 	for seg in string_gmatch(path, "[^%.]+") do
