@@ -5,8 +5,7 @@ local debug_info = debug.info
 
 local function newcheckcaller()
 	local original_f = debug_info(2, "f")
-	local original_s, original_l, original_n, original_a1, original_a2 =
-		debug_info(2, "slna")
+	local original_s, original_l, original_n, original_a1, original_a2 = debug_info(2, "slna")
 
 	return (function()
 		for i = 2, 8 do
