@@ -41,15 +41,23 @@ userdata:HelloWorld() --> Output: "__namecall method: HelloWorld"
 
 Returns `true` if the caller is the original, otherwise returns `false`
 
-**Example:**
+**Example (ModuleScript):**
 
 ```lua
-local userdata = newproxy(true)
-getmetatable(userdata).__index = function(self, key)
-	print("is the original caller? " .. tostring(checkcaller()))
+--// (in the ModuleScript)
+local function test()
+	print(checkcaller())
 end
+test() --> "true"
 
-local nothing = userdata.key --> Output: "is the original caller? true"
+return test
+```
+
+**Example (LocalScript):**
+```lua
+--// (in the requiring script)
+local modulef = require(ModuleScript.Path)
+modulef() --> "false"
 ```
 
 ### 4. `hookmetamethod`
