@@ -31,14 +31,16 @@ Usage:
 --// (in the ModuleScript)
 checkcaller = newcheckcaller()
 
-local function test()
-	print(checkcaller())
+local userdata = newproxy(true)
+getmetatable(userdata).__index = function(self, key)
+	print("is the original caller? " .. tostring(checkcaller()))
 end
-test() --> "true"
 
-return test
+local nothing = userdata.key --> Output: "is the original caller? true"
+
+return userdata
 
 --// (in the requiring script)
-local modulef = require(ModuleScript.Path)
-modulef() --> "false"
+local moduleu = require(ModuleScript.Path)
+local nothing = moduleu.key --> Output: "is the original caller? false"
 ]=]
