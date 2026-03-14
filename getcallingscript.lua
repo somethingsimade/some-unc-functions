@@ -10,7 +10,6 @@ local Connect = DescendantRemoving.Connect
 local GetFullName = game.GetFullName
 local table = table
 local table_insert = table.insert
-local table_freeze = table.freeze
 
 local debug = debug
 local debug_info = debug.info
@@ -24,7 +23,6 @@ local _getfenv   = getfenv
 local _rawget   = rawget
 local _typeof   = typeof
 local _ipairs   = ipairs
-local _tostring   = tostring
 local IsA  = game.IsA
 local RunContextClient = Enum.RunContext.Client
 
