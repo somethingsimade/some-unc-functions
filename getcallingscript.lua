@@ -10,6 +10,7 @@ local Connect = DescendantRemoving.Connect
 local GetFullName = game.GetFullName
 local table = table
 local table_insert = table.insert
+local math_huge = math.huge
 
 local debug = debug
 local debug_info = debug.info
@@ -44,21 +45,21 @@ _xpcall(
 Connect(DescendantRemoving, function(d)
 	table_insert(tblnil, d)
 	table_insert(allinstances, d)
-	if (IsA(d, "LocalScript") or (IsA(d, "Script") and indexinstance(d, "RunContext") == RunContextClient)) then
+	if d and (IsA(d, "LocalScript") or (IsA(d, "ModuleScript")) or (IsA(d, "Script") and indexinstance(d, "RunContext") == RunContextClient)) then
 		table_insert(LocalScripts, d)
 	end
 end)
 Connect(DescendantAdded, function(d)
 	table_insert(tblvalid, d)
 	table_insert(allinstances, d)
-	if (IsA(d, "LocalScript") or (IsA(d, "Script") and indexinstance(d, "RunContext") == RunContextClient)) then
+	if d and (IsA(d, "LocalScript") or (IsA(d, "ModuleScript")) or (IsA(d, "Script") and indexinstance(d, "RunContext") == RunContextClient)) then
 		table_insert(LocalScripts, d)
 	end
 end)
 for i, v in _ipairs(GetDescendants(game)) do
 	table_insert(tblvalid, v)
 	table_insert(allinstances, v)
-	if (IsA(v, "LocalScript") or (IsA(v, "Script") and indexinstance(v, "RunContext") == RunContextClient)) then
+	if v and (IsA(v, "LocalScript") or (IsA(v, "ModuleScript")) or (IsA(v, "Script") and indexinstance(v, "RunContext") == RunContextClient)) then
 		table_insert(LocalScripts, v)
 	end
 end
@@ -85,6 +86,28 @@ if not getlocalscripts then
 	end
 end
 
+local function isNormalPath(path)
+	if path == "game" then
+		return true
+	end
+
+	if string_sub(path, 1, 5) == "game." then
+		path = string_sub(path, 6)
+	end
+
+	for seg in string_gmatch(path, "[^%.]+") do
+		if seg == "" then
+			return false
+		end
+
+		if not string_match(seg, "^[%a_][%w_]*$") then
+			return false
+		end
+	end
+
+	return true
+end
+
 local function getInstance(path)
 	local current = game
 	if path == "game" then 
@@ -108,13 +131,15 @@ end
 -- // Main function
 @native
 function getcallingscript()
-	for i = 3, 10 do 
+	for i = 2, math_huge do 
 		local src = debug_info(i, "s")
 		if not src then break end
 
-		local inst = getInstance(src)
-		if inst then
-			return inst
+		if isNormalPath(src) then
+			local inst = getInstance(src)
+			if inst then
+				return inst
+			end
 		end
 
 		local f = debug_info(i, "f")
@@ -128,7 +153,7 @@ function getcallingscript()
 	end
 
 	local tb = debug_traceback()
-	local path = string_match(tb, "([%w%.]+):%d+")
+	local path = string_match(tb, "([%w%._%-]+):%d+")
 	if path then
 		for _, v in _ipairs(getlocalscripts()) do
 			if GetFullName(v) == path then
