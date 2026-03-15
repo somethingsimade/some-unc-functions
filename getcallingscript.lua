@@ -2,7 +2,6 @@
 -- © 2026 MrY7zz (MIT License)
 
 -- // Caching
-local game = Game
 local DescendantRemoving = game.DescendantRemoving
 local DescendantAdded = game.DescendantAdded
 local GetDescendants = game.GetDescendants
@@ -12,7 +11,6 @@ local table = table
 local table_insert = table.insert
 local math_huge = math.huge
 
-local debug = debug
 local debug_info = debug.info
 local debug_traceback = debug.traceback
 local string_gmatch   = string.gmatch
