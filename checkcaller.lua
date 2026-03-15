@@ -2,6 +2,7 @@
 -- © 2026 MrY7zz (MIT License)
 
 local debug_info = debug.info
+local math_huge = math.huge
 
 local function newcheckcaller()
 	local original_f = debug_info(2, "f")
