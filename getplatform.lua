@@ -99,7 +99,7 @@ local function isWindowsTimezone(value)
 		if s == "" then return false end
 	end
 
-	if #s > 80 or string_match(s, "[^A-Za-z0-9 .,'&/%(%)+%-]") then return false end
+	if string_len(s) > 80 or string_match(s, "[^A-Za-z0-9 .,'&/%(%)+%-]") then return false end
 	if s == "UTC" then return true end
 
 	local hh = string_match(s, "^UTC[%+%-](%d%d)$")
