@@ -39,6 +39,8 @@ local IsUserFeatureEnabled = us.IsUserFeatureEnabled
 local Enum_Platform = Enum.Platform
 local Enum_KeyCode = Enum.KeyCode
 
+local MatchmakingType = instanceIndex(game, "MatchmakingType")
+
 local Plat_None = enumIndex(Enum_Platform, "None")
 local Plat_UWP = enumIndex(Enum_Platform, "UWP")
 local Plat_XBoxOne = enumIndex(Enum_Platform, "XBoxOne")
@@ -142,13 +144,13 @@ local function GetPlatform()
 		local rbxassetForKeycode = string_lower(GetImageForKeyCode(UserInputService, KeyCode_ButtonSelect))
 		local triggerButtonName = enumIndex(enumIndex(Enum_KeyCode, "ButtonL2"), "Name")
 
-		if triggerButtonName == "ButtonL2" then --// PlayStation
+		if triggerButtonName == "ButtonL2" or MatchmakingType == enumIndex(enumIndex(Enum, "MatchmakingType"), "PlayStationOnly") then --// PlayStation
 			if string_match(rbxassetForKeycode, "ps4") then
 				return Plat_PS4
 			elseif string_match(rbxassetForKeycode, "ps5") then 
 				return Plat_PS5
 			end
-		elseif triggerButtonName == "ButtonLT" then --// Xbox
+		elseif triggerButtonName == "ButtonLT" or MatchmakingType == enumIndex(enumIndex(Enum, "MatchmakingType"), "XboxOnly") then --// Xbox
 			if string_match(rbxassetForKeycode, "xbox") or isWindowsTz then 
 				--// OneStatFrame detection wouldn't work 1. LocalScripts can't access instances inside CoreGui and even more recently Roblox made CoreGui nil for LocalScripts...
 				return Plat_XBoxOne
