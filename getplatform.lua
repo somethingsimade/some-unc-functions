@@ -130,29 +130,43 @@ local function GetPlatform()
 	if type(timeZone) ~= "string" then
 		return Plat_None
 	end
+	
+	local isWindowsTz = isWindowsTimezone(timeZone)
 
 	-- Executing the cached methods by passing 'self'
 	local Console = IsTenFootInterface(GuiService)
 	local VR = instanceIndex(UserInputService, "VREnabled") and instanceIndex(VRService, "VREnabled")
+	
+	-- Console
+	if Console then
+		local rbxassetForKeycode = string_lower(GetImageForKeyCode(UserInputService, KeyCode_ButtonSelect))
+		local triggerButtonName = enumIndex(enumIndex(Enum_KeyCode, "ButtonL2"), "Name")
 
-	-- Lazy timezone evaluation wrapper
-	local isWindowsTz = nil 
-	local function checkWindowsTz()
-		if isWindowsTz == nil then isWindowsTz = isWindowsTimezone(timeZone) end
-		return isWindowsTz
+		if triggerButtonName == "ButtonL2" then --// PlayStation
+			if string_match(rbxassetForKeycode, "ps4") then
+				return Plat_PS4
+			elseif string_match(rbxassetForKeycode, "ps5") then 
+				return Plat_PS5
+			end
+		elseif triggerButtonName == "ButtonLT" then --// Xbox
+			if string_match(rbxassetForKeycode, "xbox") or isWindowsTz then 
+				--// OneStatFrame detection wouldn't work 1. LocalScripts can't access instances inside CoreGui and even more recently Roblox made CoreGui nil for LocalScripts...
+				return Plat_XBoxOne
+			end
+		end
 	end
 
 	--// We are operating on windows
 	if not isWindowsSucceeded then
-		if MobileUwpOrVr and checkWindowsTz() then
+		if MobileUwpOrVr and isWindowsTz then
 			return Plat_UWP
-		elseif Console and checkWindowsTz() then 
+		elseif Console and isWindowsTz then 
 			return Plat_XBoxOne
-		elseif checkWindowsTz() and Web then
+		elseif isWindowsTz and Web then
 			return Plat_Windows
 		end
 	elseif isWindows then
-		if MobileUwpOrVr and checkWindowsTz() then
+		if MobileUwpOrVr and isWindowsTz then
 			return Plat_UWP
 		elseif Console then
 			return Plat_XBoxOne
@@ -161,7 +175,7 @@ local function GetPlatform()
 		end
 		--// ^ Maybe leave outside isWindows check
 
-		if checkWindowsTz() and Web then
+		if isWindowsTz and Web then
 			return Plat_Windows
 		end
 	end
@@ -169,48 +183,46 @@ local function GetPlatform()
 	--// More checks
 
 	-- OSX
+	local hasTouch = instanceIndex(UserInputService, "TouchEnabled")
 	local success1, UserFixOrbitalCam = pcall(IsUserFeatureEnabled, us, "UserFixOrbitalCam")
 
 	if success1 and UserFixOrbitalCam then
 		local success2, UserInputRefactor2 = pcall(IsUserFeatureEnabled, us, "UserInputRefactor2")
-		if success2 and UserInputRefactor2 and isValidCharacter("\u{F8FF}") then
+		if success2 and UserInputRefactor2 then
 			return Plat_OSX
 		end
 	end
-
-	-- Console
-	if Console then
-		local rbxassetForKeycode = string_lower(GetImageForKeyCode(UserInputService, KeyCode_ButtonSelect))
-
-		if string_match(rbxassetForKeycode, "ps4") then
-			return Plat_PS4
-		elseif string_match(rbxassetForKeycode, "ps5") then 
-			return Plat_PS5
-		elseif string_match(rbxassetForKeycode, "xbox") or checkWindowsTz() then 
-			--// OneStatFrame detection wouldn't work 1. LocalScripts can't access instances inside CoreGui and even more recently Roblox made CoreGui nil for LocalScripts...
-			return Plat_XBoxOne
-		end
+	
+	if isValidCharacter("\u{F8FF}") and not hasTouch then
+		return Plat_OSX
 	end
-
+	
 	-- Final checks
 	if MobileUwpOrVr then
 		if VR then
 			return Plat_MetaOS
 		end
-		
+
 		local hasAccel = instanceIndex(UserInputService, "AccelerometerEnabled")
 		local hasGyro = instanceIndex(UserInputService, "GyroscopeEnabled")
-		
-		if not hasAccel and not hasGyro then
+
+		if not hasAccel and not hasGyro then --// No hasTouch since some laptops have touchscreen
 			return Plat_Linux -- Sober
 		end
-		
+
 		if getArchitecture() == 32 or not isValidCharacter("\u{F8FF}") then
 			return Plat_Android
 		end
 
 		if matchesIOS(timeZone) then
 			return Plat_IOS
+		end
+		
+		local success3, FFlagUserHandleChatHotKey = pcall(IsUserFeatureEnabled, us, "FFlagUserHandleChatHotKeyWithContextActionService")
+		local isDesktopDPI = GetTextSize(TextService, utf8.char(0xFFFD), unpack(TextSettings)).X >= 12.8
+			
+		if success3 and (FFlagUserHandleChatHotKey or isDesktopDPI) then
+			return Plat_Linux -- Sober
 		end
 	elseif VR then
 		-- There isn't another VR platform, at least in Enum.Platform
