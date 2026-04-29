@@ -3,29 +3,32 @@
 
 local debug_info = debug.info
 local math_huge = math.huge
+local coroutine_running = coroutine.running
 
 local function newcheckcaller()
 	local original_f = debug_info(2, "f")
 	local original_s, original_n, original_a1, original_a2 = debug_info(2, "sna")
-	
-	return (function()
-		if original_f == nil then
-			return false
-		end
+	local original_t = coroutine_running()
 
+	return (function()
+		
+		if coroutine_running() == original_t then
+			return true
+		end
+		
 		for i = 2, math_huge do
 			local f = debug_info(i, "f")
 
 			if f == nil then
-				return false
+				break
 			end
-			
-			local s, n, a1, a2 = debug_info(i, "sna")
-			if s == original_s and a1 == original_a1 and a2 == original_a2 and (original_n == nil or n == nil or n == original_n) then
+
+			if original_f ~= nil and f == original_f then
 				return true
 			end
 
-			if f == original_f then
+			local s, n, a1, a2 = debug_info(i, "sna")
+			if s == original_s and a1 == original_a1 and a2 == original_a2 and (original_n == nil or n == nil or n == original_n) then
 				return true
 			end
 		end
